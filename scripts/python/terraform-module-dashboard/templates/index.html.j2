@@ -1,0 +1,345 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>{{ organization }} · Terraform Modules</title>
+  <style>
+    :root {
+      --bg: #f8fafc;
+      --surface: #ffffff;
+      --border: #e2e8f0;
+      --border-strong: #cbd5e1;
+      --text: #0f172a;
+      --muted: #64748b;
+      --accent: #4f46e5;
+      --accent-soft: #eef2ff;
+      --shadow: 0 1px 2px rgba(15, 23, 42, 0.04),
+                0 1px 3px rgba(15, 23, 42, 0.06);
+      --radius: 10px;
+    }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen,
+                   Ubuntu, Cantarell, "Helvetica Neue", sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      line-height: 1.5;
+    }
+    a { color: var(--accent); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    code {
+      font-family: "SFMono-Regular", ui-monospace, Menlo, Consolas, monospace;
+      background: #f1f5f9; padding: 2px 6px; border-radius: 4px; font-size: 12px;
+      color: #334155;
+    }
+
+    header {
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      padding: 24px;
+    }
+    .container { max-width: 1200px; margin: 0 auto; padding: 0 24px; }
+    header h1 { margin: 0 0 4px; font-size: 22px; font-weight: 600; letter-spacing: -0.01em; }
+    header p { margin: 0; color: var(--muted); font-size: 14px; }
+    .meta {
+      display: flex; flex-wrap: wrap; gap: 8px 20px;
+      margin-top: 12px; color: var(--muted); font-size: 13px;
+    }
+    .meta strong { color: var(--text); font-weight: 600; }
+
+    main { padding: 24px 0 48px; }
+
+    .toolbar {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 14px;
+      display: grid;
+      grid-template-columns: 1fr 200px 200px auto;
+      gap: 10px;
+      align-items: center;
+      box-shadow: var(--shadow);
+    }
+    .toolbar input, .toolbar select {
+      width: 100%; height: 38px; padding: 0 12px;
+      border: 1px solid var(--border-strong); border-radius: 8px;
+      background: var(--surface); color: var(--text); font-size: 14px;
+      font-family: inherit;
+    }
+    .toolbar input:focus, .toolbar select:focus {
+      outline: none; border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.15);
+    }
+    .toolbar .search { position: relative; }
+    .toolbar .search input { padding-left: 34px; }
+    .toolbar .search::before {
+      content: "⌕"; position: absolute; left: 12px; top: 50%;
+      transform: translateY(-50%); color: var(--muted); font-size: 16px;
+    }
+    .toolbar .count {
+      font-size: 13px; color: var(--muted); padding: 0 12px; white-space: nowrap;
+    }
+    .toolbar .count strong { color: var(--text); }
+
+    @media (max-width: 820px) {
+      .toolbar { grid-template-columns: 1fr; }
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+      gap: 14px;
+      margin-top: 16px;
+    }
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 16px;
+      display: flex; flex-direction: column; gap: 12px;
+      box-shadow: var(--shadow);
+      transition: border-color 120ms ease, box-shadow 120ms ease;
+    }
+    .card:hover {
+      border-color: var(--border-strong);
+      box-shadow: 0 4px 8px rgba(15, 23, 42, 0.06),
+                  0 2px 4px rgba(15, 23, 42, 0.04);
+    }
+    .card-head {
+      display: flex; align-items: flex-start; justify-content: space-between; gap: 10px;
+    }
+    .name-block { min-width: 0; }
+    .card-name {
+      margin: 0; font-size: 16px; font-weight: 600;
+      overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+    }
+    .provider {
+      display: inline-block; font-size: 11px; color: var(--muted);
+      text-transform: uppercase; letter-spacing: 0.5px; margin-top: 2px;
+    }
+    .badge {
+      display: inline-block; font-size: 11px; font-weight: 600;
+      padding: 3px 8px; border-radius: 999px; white-space: nowrap;
+      color: white;
+    }
+
+    .version-row {
+      display: flex; align-items: center; gap: 10px;
+      padding: 8px 0; border-top: 1px dashed var(--border);
+      border-bottom: 1px dashed var(--border);
+    }
+    .version {
+      font-family: "SFMono-Regular", ui-monospace, Menlo, Consolas, monospace;
+      font-size: 16px; font-weight: 600; color: var(--accent);
+    }
+    .version.missing { color: #ef4444; font-weight: 500; font-size: 13px; }
+    .release-date { color: var(--muted); font-size: 12px; margin-left: auto; }
+
+    .links {
+      display: flex; flex-wrap: wrap; gap: 6px 10px;
+      font-size: 13px;
+    }
+    .links a {
+      display: inline-flex; align-items: center; gap: 4px;
+      padding: 4px 10px; border-radius: 6px;
+      background: var(--accent-soft); color: var(--accent);
+      font-weight: 500;
+    }
+    .links a:hover { background: #e0e7ff; text-decoration: none; }
+    .links .disabled {
+      color: #cbd5e1; padding: 4px 10px; font-weight: 500;
+      cursor: not-allowed;
+    }
+
+    .empty {
+      text-align: center; color: var(--muted); padding: 60px 20px;
+      background: var(--surface); border: 1px dashed var(--border);
+      border-radius: var(--radius);
+    }
+
+    footer {
+      color: var(--muted); font-size: 12px; padding: 24px 0 0;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="container">
+      <h1>{{ organization }} · Terraform Modules</h1>
+      <p>Latest published versions from the private module registry.</p>
+      <div class="meta">
+        <span><strong id="visible-count">{{ module_count }}</strong> of <strong>{{ module_count }}</strong> module{{ '' if module_count == 1 else 's' }}</span>
+        <span>Registry host: <strong>{{ host }}</strong></span>
+        <span>Last refreshed: <strong>{{ generated_at | fmt_date }}</strong></span>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <div class="container">
+
+      <div class="toolbar">
+        <div class="search">
+          <input id="q" type="search" placeholder="Search modules by name…" autocomplete="off" />
+        </div>
+
+        <select id="category-filter" aria-label="Filter by provider">
+          <option value="">All providers</option>
+          {% for c in categories %}
+          <option value="{{ c.id }}">{{ c.label }} ({{ c.count }})</option>
+          {% endfor %}
+        </select>
+
+        <select id="sort" aria-label="Sort">
+          <option value="name-asc">Name (A → Z)</option>
+          <option value="name-desc">Name (Z → A)</option>
+          <option value="version-desc">Version (high → low)</option>
+          <option value="version-asc">Version (low → high)</option>
+          <option value="date-desc">Release date (newest)</option>
+          <option value="date-asc">Release date (oldest)</option>
+        </select>
+
+        <div class="count">Showing <strong id="visible-count-2">{{ module_count }}</strong></div>
+      </div>
+
+      {% if modules %}
+      <div id="grid" class="grid">
+        {% for m in modules %}
+        <article class="card"
+                 data-name="{{ m.name | lower }}"
+                 data-provider="{{ m.provider | lower }}"
+                 data-category="{{ m.category }}"
+                 data-version="{{ m.latest_version or '0.0.0' }}"
+                 data-released="{{ m.released_at or '' }}">
+          <div class="card-head">
+            <div class="name-block">
+              <h2 class="card-name" title="{{ m.name }}">{{ m.name }}</h2>
+              <span class="provider">{{ m.provider }}</span>
+            </div>
+            <span class="badge" style="background: {{ m.category_color }}">{{ m.category_label }}</span>
+          </div>
+
+          <div class="version-row">
+            {% if m.latest_version %}
+              <span class="version">v{{ m.latest_version }}</span>
+            {% else %}
+              <span class="version missing">no published versions</span>
+            {% endif %}
+            <span class="release-date">{{ m.released_at | fmt_date }}</span>
+          </div>
+
+          <div class="links">
+            {% if m.registry_url %}
+              <a href="{{ m.registry_url }}" target="_blank" rel="noopener">Registry ↗</a>
+            {% endif %}
+            {% if m.changelog_url %}
+              <a href="{{ m.changelog_url }}" target="_blank" rel="noopener">CHANGELOG ↗</a>
+            {% else %}
+              <span class="disabled" title="No changelog link configured in the registry feed">CHANGELOG —</span>
+            {% endif %}
+            {% if m.confluence_url %}
+              <a href="{{ m.confluence_url }}" target="_blank" rel="noopener">Confluence ↗</a>
+            {% else %}
+              <span class="disabled" title="No Confluence link configured in the registry feed">Confluence —</span>
+            {% endif %}
+          </div>
+        </article>
+        {% endfor %}
+      </div>
+      {% else %}
+      <div class="empty">No modules found in <code>{{ organization }}</code>.</div>
+      {% endif %}
+
+      <footer>
+        Generated by <code>module_release_dashboard</code>. Raw data:
+        <a href="modules.json">modules.json</a>.
+      </footer>
+
+    </div>
+  </main>
+
+  <script>
+    (function () {
+      const grid = document.getElementById("grid");
+      if (!grid) return;
+
+      const cards = Array.from(grid.querySelectorAll(".card"));
+      const qEl = document.getElementById("q");
+      const catEl = document.getElementById("category-filter");
+      const sortEl = document.getElementById("sort");
+      const countEls = [
+        document.getElementById("visible-count"),
+        document.getElementById("visible-count-2"),
+      ].filter(Boolean);
+
+      function parseSemver(v) {
+        if (!v) return [0, 0, 0, ""];
+        const parts = v.replace(/^v/, "").split(/[.\-+]/);
+        return [
+          parseInt(parts[0] || "0", 10) || 0,
+          parseInt(parts[1] || "0", 10) || 0,
+          parseInt(parts[2] || "0", 10) || 0,
+          parts.slice(3).join("-") || "",
+        ];
+      }
+
+      function cmpSemver(a, b) {
+        for (let i = 0; i < 3; i++) {
+          if (a[i] !== b[i]) return a[i] - b[i];
+        }
+        return a[3].localeCompare(b[3]);
+      }
+
+      function apply() {
+        const q = (qEl.value || "").trim().toLowerCase();
+        const cat = catEl.value;
+        const sort = sortEl.value;
+
+        let visible = 0;
+        cards.forEach((card) => {
+          const name = card.dataset.name || "";
+          const provider = card.dataset.provider || "";
+          const category = card.dataset.category || "";
+          const matchesQ = !q || name.includes(q) || provider.includes(q);
+          const matchesCat = !cat || category === cat;
+          const show = matchesQ && matchesCat;
+          card.style.display = show ? "" : "none";
+          if (show) visible++;
+        });
+        countEls.forEach((el) => (el.textContent = visible));
+
+        // Sort visible cards; keep hidden ones after them.
+        const sorted = cards.slice().sort((a, b) => {
+          switch (sort) {
+            case "name-asc":
+              return a.dataset.name.localeCompare(b.dataset.name);
+            case "name-desc":
+              return b.dataset.name.localeCompare(a.dataset.name);
+            case "version-asc":
+              return cmpSemver(parseSemver(a.dataset.version), parseSemver(b.dataset.version));
+            case "version-desc":
+              return cmpSemver(parseSemver(b.dataset.version), parseSemver(a.dataset.version));
+            case "date-asc":
+              return (a.dataset.released || "").localeCompare(b.dataset.released || "");
+            case "date-desc":
+              return (b.dataset.released || "").localeCompare(a.dataset.released || "");
+            default:
+              return 0;
+          }
+        });
+        sorted.forEach((c) => grid.appendChild(c));
+      }
+
+      qEl.addEventListener("input", apply);
+      catEl.addEventListener("change", apply);
+      sortEl.addEventListener("change", apply);
+      apply();
+    })();
+  </script>
+</body>
+</html>
